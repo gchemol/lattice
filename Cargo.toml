@@ -8,7 +8,8 @@ edition = "2018"
 authors = ["Wenping Guo <ybyygu@gmail.com>"]
 
 [dependencies]
-vecfx = { path = "../vecfx", features = ["nalgebra"] }
+#vecfx = { path = "../vecfx", features = ["nalgebra"] }
+vecfx = { git = "https://github.com/gchemol/vecfx.git", features = ["nalgebra"], branch = "dev" }
 guts = { git = "https://github.com/ybyygu/guts.git" }
 serde = {version="1", features = ["derive"]}
 
