@@ -2,16 +2,15 @@
 
 # [[file:~/Workspace/Programming/gchemol-rs/lattice/lattice.note::*cargo][cargo:1]]
 [package]
-name = "gchemol-lattice"
+name = "gchemol_lattice"
 version = "0.0.1"
 edition = "2018"
 authors = ["Wenping Guo <ybyygu@gmail.com>"]
 
 [dependencies]
-#vecfx = { path = "../vecfx", features = ["nalgebra"] }
-vecfx = { git = "https://github.com/gchemol/vecfx.git", features = ["nalgebra"], branch = "dev" }
-guts = { git = "https://github.com/ybyygu/guts.git" }
 serde = {version="1", features = ["derive"]}
+vecfx = { git = "https://github.com/gchemol/vecfx.git", features = ["nalgebra"] }
+guts = { git = "https://github.com/ybyygu/guts.git" }
 
 [dev-dependencies]
 approx = "*"
