@@ -3,7 +3,7 @@
 # [[file:~/Workspace/Programming/gchemol-rs/lattice/lattice.note::*cargo][cargo:1]]
 [package]
 name = "gchemol_lattice"
-version = "0.0.1"
+version = "0.0.2"
 edition = "2018"
 authors = ["Wenping Guo <ybyygu@gmail.com>"]
 
