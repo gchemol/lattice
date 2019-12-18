@@ -13,5 +13,5 @@ vecfx = { git = "https://github.com/gchemol/vecfx.git", features = ["nalgebra"] 
 guts = { git = "https://github.com/ybyygu/guts.git" }
 
 [dev-dependencies]
-approx = "*"
+approx = { version = "0.3" }
 # cargo:1 ends here

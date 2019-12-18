@@ -10,7 +10,7 @@
 //        AUTHOR:  Wenping Guo <ybyygu@gmail.com>
 //       LICENCE:  GPL version 3
 //       CREATED:  <2018-04-29 14:27>
-//       UPDATED:  <2019-12-17 Tue 16:45>
+//       UPDATED:  <2019-12-18 Wed 09:30>
 //===============================================================================#
 // header:1 ends here
 
@@ -19,10 +19,6 @@
 // [[file:~/Workspace/Programming/gchemol-rs/lattice/lattice.note::*imports][imports:1]]
 use guts::prelude::*;
 use vecfx::*;
-
-#[cfg(test)]
-#[macro_use]
-extern crate approx;
 // imports:1 ends here
 
 // mods

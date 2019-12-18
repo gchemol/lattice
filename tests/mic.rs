@@ -33,21 +33,4 @@ fn test_mic_distance() {
     let dij = lattice.distance(pi, pj);
     assert_relative_eq!(dij, 1.8167, epsilon = 1e-4);
 }
-
-#[test]
-fn test_mic_vector() {
-    let mut lat = Lattice::new([
-        [7.055, 0., 0.],
-        [0., 6.795, 0.],
-        [-1.14679575, 0., 5.65182701],
-    ]);
-
-    // mic vector
-    let expected = Vector3f::from([-0.48651737, 0.184824, -1.31913642]);
-    let pmic = lat.apply_mic([5.42168688, 0.184824, 4.33269058]);
-    assert_relative_eq!(expected, pmic, epsilon = 1e-4);
-
-    let pmic = lat.apply_mic([5.42168688, 0.184824, 4.33269058]);
-    assert_relative_eq!(expected, pmic, epsilon = 1e-4);
-}
 // mic.rs:1 ends here

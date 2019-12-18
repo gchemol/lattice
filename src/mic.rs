@@ -144,6 +144,13 @@ impl Lattice {
 
         images
     }
+
+    /// Wrap a point to unit cell, obeying the periodic boundary conditions.
+    pub fn wrap(&mut self, vec: [f64; 3]) -> [f64; 3] {
+        let [fx, fy, fz] = self.to_frac(vec);
+        let fcoords_wrapped = [fx - fx.floor(), fy - fy.floor(), fz - fz.floor()];
+        self.to_cart(fcoords_wrapped)
+    }
 }
 // distance:1 ends here
 
@@ -260,5 +267,24 @@ fn test_neighborhood() {
     let images = lat.relevant_images(3.0);
     assert_eq!(expected.len(), images.len());
     assert_eq!(expected[1][2], images[1][2]);
+}
+
+#[test]
+// adopted from lumol
+fn test_wrap() {
+    // Cubic unit cell
+    let mut cell = Lattice::from_params(10.0, 10.0, 10.0, 90.0, 90.0, 90.0);
+    let wrapped: Vector3f = cell.wrap([9.0, 18.0, -6.0]).into();
+    assert_relative_eq!(wrapped, Vector3f::from([9.0, 8.0, 4.0]), epsilon = 1e-4);
+
+    // Orthorhombic unit cell
+    let mut cell = Lattice::from_params(3.0, 4.0, 5.0, 90.0, 90.0, 90.0);
+    let wrapped: Vector3f = cell.wrap([1.0, 1.5, 6.0]).into();
+    assert_relative_eq!(wrapped, Vector3f::from([1.0, 1.5, 1.0]), epsilon = 1e-4);
+
+    // Triclinic unit cell
+    let mut cell = Lattice::from_params(3.0, 4.0, 5.0, 90.0, 90.0, 90.0);
+    let wrapped: Vector3f = cell.wrap([1.0, 1.5, 6.0]).into();
+    assert_relative_eq!(wrapped, Vector3f::from([1.0, 1.5, 1.0]), epsilon = 1e-4);
 }
 // test:1 ends here
