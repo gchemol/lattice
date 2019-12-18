@@ -114,7 +114,7 @@ impl Lattice {
     }
 
     /// Return the shortest vector by applying the minimum image convention.
-    pub fn apply_mic(&mut self, p: [f64; 3]) -> Vector3f {
+    pub(crate) fn apply_mic(&mut self, p: [f64; 3]) -> Vector3f {
         let v_naive = self.apply_mic_tuckerman(p);
         let r_max = 0.5 * self.widths().min();
         if v_naive.norm() < r_max {
@@ -126,7 +126,7 @@ impl Lattice {
 
     /// Return the relevant periodic images required for neighborhood search
     /// within cutoff radius
-    pub fn relevant_images(&mut self, radius: f64) -> Vec<Vector3f> {
+    pub(crate) fn relevant_images(&mut self, radius: f64) -> Vec<Vector3f> {
         let ns = self.n_min_images(radius);
         let na = ns[0] as isize;
         let nb = ns[1] as isize;
