@@ -42,7 +42,8 @@ impl Lattice {
         // The cutoff radius for finding relevant images.
         // Use the value from Tuckerman algorithm as cutoff radius, since it is
         // always larger than the real distance using minimum image convention
-        let cutoff = self.apply_mic_tuckerman(p).norm();
+        let p = self.apply_mic_tuckerman(p);
+        let cutoff = p.norm();
         let relevant_images = self.relevant_images(cutoff);
 
         let mut target = (
@@ -115,12 +116,17 @@ impl Lattice {
 
     /// Return the shortest vector by applying the minimum image convention.
     pub(crate) fn apply_mic(&mut self, p: [f64; 3]) -> Vector3f {
+        // Tuckerman algorithm works well for Orthorombic cell
         let v_naive = self.apply_mic_tuckerman(p);
-        let r_max = 0.5 * self.widths().min();
-        if v_naive.norm() < r_max {
+        if self.is_orthorhombic() {
             v_naive
         } else {
-            self.apply_mic_brute_force(p)
+            let r_max = 0.5 * self.widths().min();
+            if v_naive.norm() < r_max {
+                v_naive
+            } else {
+                self.apply_mic_brute_force(p)
+            }
         }
     }
 
@@ -193,9 +199,9 @@ fn test_mic_distance() {
 #[test]
 fn test_mic_vector() {
     let mut lat = Lattice::new([
-        [7.055, 0., 0.],
-        [0., 6.795, 0.],
-        [-1.14679575, 0., 5.65182701],
+        [7.055000000, 0.000000, 0.00000000],
+        [0.000000000, 6.795000, 0.00000000],
+        [-1.14679575, 0.000000, 5.65182701],
     ]);
 
     // mic vector
