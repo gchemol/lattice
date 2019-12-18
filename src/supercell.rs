@@ -41,7 +41,7 @@ fn test_supercell() {
         [2.00000000, 1.15470054, 3.26598632],
     ];
 
-    let mut lattice = Lattice::new(cell);
+    let lattice = Lattice::new(cell);
     let points = vec![[0.0; 3]];
     let new_points = lattice.replicate(&points, -1..=1, -1..=1, -1..=1);
     assert_eq!(new_points.len(), 27);

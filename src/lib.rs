@@ -10,7 +10,7 @@
 //        AUTHOR:  Wenping Guo <ybyygu@gmail.com>
 //       LICENCE:  GPL version 3
 //       CREATED:  <2018-04-29 14:27>
-//       UPDATED:  <2019-12-18 Wed 19:57>
+//       UPDATED:  <2019-12-18 Wed 21:14>
 //===============================================================================#
 // header:1 ends here
 
@@ -31,9 +31,9 @@ mod supercell;
 use crate::utils::*;
 // mods:1 ends here
 
-// api
+// base
 
-// [[file:~/Workspace/Programming/gchemol-rs/lattice/lattice.note::*api][api:1]]
+// [[file:~/Workspace/Programming/gchemol-rs/lattice/lattice.note::*base][base:1]]
 /// Periodic 3D lattice
 #[derive(Debug, Clone, Copy, Deserialize, Serialize)]
 pub struct Lattice {
@@ -41,89 +41,35 @@ pub struct Lattice {
     matrix: Matrix3f,
     /// Lattice origin
     origin: Vector3f,
-
-    /// Cached inverse of lattice matrix
-    inv_matrix: Option<Matrix3f>,
-
-    /// Cached volume of the unit cell.
-    volume: Option<f64>,
-
-    /// The perpendicular widths of the unit cell on each direction,
-    /// i.e. the distance between opposite faces of the unit cell
-    widths: Option<[f64; 3]>,
-
-    /// Cached cell lengths parameters
-    lengths: Option<[f64; 3]>,
-
-    /// Cached cell angles parameters
-    angles: Option<[f64; 3]>,
+    /// inverse of lattice matrix
+    inv_matrix: Matrix3f,
 }
 
 impl Default for Lattice {
     fn default() -> Self {
+        let matrix = Matrix3f::identity();
+        let inv_matrix = get_inv_matrix(&matrix);
         Lattice {
-            matrix: Matrix3f::identity(),
+            matrix,
+            inv_matrix,
             origin: Vector3f::zeros(),
-
-            inv_matrix: None,
-            volume: None,
-            widths: None,
-            lengths: None,
-            angles: None,
         }
     }
 }
+// base:1 ends here
 
+// api
+
+// [[file:~/Workspace/Programming/gchemol-rs/lattice/lattice.note::*api][api:1]]
 impl Lattice {
     pub fn new<T: Into<[[f64; 3]; 3]>>(tvs: T) -> Self {
+        let matrix = Matrix3f::from(tvs.into());
+        let inv_matrix = get_inv_matrix(&matrix);
         Lattice {
-            matrix: Matrix3f::from(tvs.into()),
+            matrix,
+            inv_matrix,
             ..Default::default()
         }
-    }
-
-    /// using a cache to reduce the expensive matrix inversion calculations
-    fn inv_matrix(&mut self) -> Matrix3f {
-        // make a readonly reference
-        let matrix = self.matrix;
-        let im = self
-            .inv_matrix
-            .get_or_insert_with(|| matrix.try_inverse().expect("bad matrix"));
-
-        *im
-    }
-
-    fn get_cell_widths(&mut self) -> [f64; 3] {
-        let volume = self.volume();
-        let [van, vbn, vcn] = self.lengths();
-
-        let wa = volume / (vbn * vcn);
-        let wb = volume / (vcn * van);
-        let wc = volume / (van * vbn);
-
-        [wa, wb, wc]
-    }
-
-    /// Return the perpendicular widths of the cell along three directions.
-    pub fn widths(&mut self) -> [f64; 3] {
-        if let Some(ws) = self.widths {
-            return ws;
-        } else {
-            let ws = self.get_cell_widths();
-            self.widths = Some(ws);
-
-            ws
-        }
-    }
-
-    /// Return the volume of the unit cell
-    /// the cache will be updated if necessary
-    pub fn volume(&mut self) -> f64 {
-        // make a read-only reference
-        let mat = self.matrix;
-        let volume = self.volume.get_or_insert_with(|| get_cell_volume(mat));
-
-        *volume
     }
 
     /// Construct lattice from lattice parameters
@@ -148,23 +94,40 @@ impl Lattice {
         Lattice::new([va, vb, vc])
     }
 
+    /// Return the perpendicular widths of the cell along three directions. i.e.
+    /// the distance between opposite faces of the unit cell
+    pub fn widths(&self) -> [f64; 3] {
+        let volume = self.volume();
+        let [van, vbn, vcn] = self.lengths();
+
+        let wa = volume / (vbn * vcn);
+        let wb = volume / (vcn * van);
+        let wc = volume / (van * vbn);
+
+        [wa, wb, wc]
+    }
+
+    /// Return the volume of the unit cell
+    /// the cache will be updated if necessary
+    pub fn volume(&self) -> f64 {
+        get_cell_volume(self.matrix)
+    }
+
     /// Set cell origin in Cartesian coordinates
     pub fn set_origin(&mut self, loc: [f64; 3]) {
         self.origin = Vector3f::from(loc);
     }
 
     /// Lattice length parameters: a, b, c
-    pub fn lengths(&mut self) -> [f64; 3] {
-        let mat = self.matrix;
-        let lengths = self.lengths.get_or_insert_with(|| get_cell_lengths(mat));
+    pub fn lengths(&self) -> [f64; 3] {
+        let lengths = get_cell_lengths(self.matrix);
 
         [lengths[0], lengths[1], lengths[2]]
     }
 
     /// Lattice angle parameters in degrees
-    pub fn angles(&mut self) -> [f64; 3] {
-        let mat = self.matrix;
-        let angles = self.angles.get_or_insert_with(|| get_cell_angles(mat));
+    pub fn angles(&self) -> [f64; 3] {
+        let angles = get_cell_angles(self.matrix);
 
         [angles[0], angles[1], angles[2]]
     }
@@ -174,13 +137,7 @@ impl Lattice {
     pub fn scale_by(&mut self, v: f64) {
         debug_assert!(v > 0.);
         self.matrix *= v;
-
-        // reset caches
-        self.inv_matrix = None;
-        self.volume = None;
-        self.widths = None;
-        self.lengths = None;
-        self.angles = None;
+        self.inv_matrix = get_inv_matrix(&self.matrix);
     }
 
     /// Get cell origin in Cartesian coordinates
@@ -189,10 +146,9 @@ impl Lattice {
     }
 
     /// Returns the fractional coordinates given cartesian coordinates.
-    pub fn to_frac(&mut self, p: [f64; 3]) -> [f64; 3] {
-        let im = self.inv_matrix();
+    pub fn to_frac(&self, p: [f64; 3]) -> [f64; 3] {
         let v = Vector3f::from(p);
-        let fs = im * (v - self.origin);
+        let fs = self.inv_matrix * (v - self.origin);
         fs.into()
     }
 
@@ -232,7 +188,7 @@ impl Lattice {
     }
 
     /// Wrap a point to unit cell, obeying the periodic boundary conditions.
-    pub fn wrap(&mut self, vec: [f64; 3]) -> [f64; 3] {
+    pub fn wrap(&self, vec: [f64; 3]) -> [f64; 3] {
         let [fx, fy, fz] = self.to_frac(vec);
         let fcoords_wrapped = [fx - fx.floor(), fy - fy.floor(), fz - fz.floor()];
         self.to_cart(fcoords_wrapped)
@@ -244,13 +200,13 @@ impl Lattice {
     /// Parameters
     /// ----------
     /// * pi, pj: Cartesian coordinates of point i and point j
-    pub fn distance(&mut self, pi: [f64; 3], pj: [f64; 3]) -> f64 {
+    pub fn distance(&self, pi: [f64; 3], pj: [f64; 3]) -> f64 {
         let pmic = self.apply_mic([pj[0] - pi[0], pj[1] - pi[1], pj[2] - pi[2]]);
         pmic.norm()
     }
 
     /// Return the shortest vector by applying the minimum image convention.
-    pub fn apply_mic(&mut self, p: [f64; 3]) -> Vector3f {
+    pub fn apply_mic(&self, p: [f64; 3]) -> Vector3f {
         // Tuckerman algorithm works well for Orthorombic cell
         let v_naive = self.apply_mic_tuckerman(p);
         if self.is_orthorhombic() {

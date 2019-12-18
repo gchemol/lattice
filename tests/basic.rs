@@ -19,7 +19,7 @@ fn test_lattice_construct() {
     let lat = Lattice::new([[18.256, 0., 0.], [0., 20.534, 0.], [0., 0., 15.084]]);
     assert_eq!(true, lat.is_orthorhombic());
 
-    let mut lat = Lattice::new([[15.3643, 0., 0.], [4.5807, 15.5026, 0.], [0., 0., 17.4858]]);
+    let lat = Lattice::new([[15.3643, 0., 0.], [4.5807, 15.5026, 0.], [0., 0., 17.4858]]);
 
     let [a, b, c] = lat.lengths();
     assert_eq!(false, lat.is_orthorhombic());
@@ -33,7 +33,7 @@ fn test_lattice_construct() {
     assert_relative_eq!(beta, 90.0, epsilon = 1e-4);
     assert_relative_eq!(gamma, 73.5386, epsilon = 1e-4);
 
-    let mut lat = Lattice::from_params(a, b, c, alpha, beta, gamma);
+    let lat = Lattice::from_params(a, b, c, alpha, beta, gamma);
     assert_eq!([a, b, c], lat.lengths());
     assert_eq!([alpha, beta, gamma], lat.angles());
 }
@@ -56,7 +56,7 @@ fn test_lattice_volume() {
 #[test]
 fn test_lattice_frac_cart() {
     // ovito/tests/files/LAMMPS/multi_sequence_1.dump
-    let mut lat = Lattice::new([[5.09, 0.00, 0.00], [0.00, 6.74, 0.00], [0.00, 0.00, 4.53]]);
+    let lat = Lattice::new([[5.09, 0.00, 0.00], [0.00, 6.74, 0.00], [0.00, 0.00, 4.53]]);
 
     let fs = lat.to_frac([2.1832, 1.6850, 3.8505]);
     assert_relative_eq!(fs[0], 0.4289, epsilon = 1e-3);
@@ -77,17 +77,17 @@ fn test_lattice_frac_cart() {
 // adopted from lumol
 fn test_wrap() {
     // Cubic unit cell
-    let mut cell = Lattice::from_params(10.0, 10.0, 10.0, 90.0, 90.0, 90.0);
+    let cell = Lattice::from_params(10.0, 10.0, 10.0, 90.0, 90.0, 90.0);
     let wrapped: Vector3f = cell.wrap([9.0, 18.0, -6.0]).into();
     assert_relative_eq!(wrapped, Vector3f::from([9.0, 8.0, 4.0]), epsilon = 1e-4);
 
     // Orthorhombic unit cell
-    let mut cell = Lattice::from_params(3.0, 4.0, 5.0, 90.0, 90.0, 90.0);
+    let cell = Lattice::from_params(3.0, 4.0, 5.0, 90.0, 90.0, 90.0);
     let wrapped: Vector3f = cell.wrap([1.0, 1.5, 6.0]).into();
     assert_relative_eq!(wrapped, Vector3f::from([1.0, 1.5, 1.0]), epsilon = 1e-4);
 
     // Triclinic unit cell
-    let mut cell = Lattice::from_params(3.0, 4.0, 5.0, 90.0, 90.0, 90.0);
+    let cell = Lattice::from_params(3.0, 4.0, 5.0, 90.0, 90.0, 90.0);
     let wrapped: Vector3f = cell.wrap([1.0, 1.5, 6.0]).into();
     assert_relative_eq!(wrapped, Vector3f::from([1.0, 1.5, 1.0]), epsilon = 1e-4);
 }

@@ -20,7 +20,7 @@ impl Lattice {
     /// - Tuckerman, M. E. Statistical Mechanics: Theory and Molecular
     /// Simulation, 1 edition.; Oxford University Press: Oxford ; New York,
     /// 2010.
-    pub(crate) fn apply_mic_tuckerman(&mut self, p: [f64; 3]) -> Vector3f {
+    pub(crate) fn apply_mic_tuckerman(&self, p: [f64; 3]) -> Vector3f {
         // apply minimum image convention on the scaled coordinates
         let mut fcoords = self.to_frac(p);
 
@@ -44,7 +44,7 @@ impl Lattice {
     /// - Tuckerman, M. E. Statistical Mechanics: Theory and Molecular
     /// Simulation, 1 edition.; Oxford University Press: Oxford ; New York,
     /// 2010.
-    pub(crate) fn distance_tuckerman(&mut self, pi: [f64; 3], pj: [f64; 3]) -> f64 {
+    pub(crate) fn distance_tuckerman(&self, pi: [f64; 3], pj: [f64; 3]) -> f64 {
         let pij = [pj[0] - pi[0], pj[1] - pi[1], pj[2] - pi[2]];
 
         let pmic = self.apply_mic_tuckerman(pij);
@@ -59,7 +59,7 @@ impl Lattice {
 impl Lattice {
     /// Return the minimal number of images for neighborhood search on each cell
     /// direction within cutoff radius
-    fn n_min_images(&mut self, radius: f64) -> [isize; 3] {
+    fn n_min_images(&self, radius: f64) -> [isize; 3] {
         let mut ns = [0; 3];
 
         for (i, &w) in self.widths().iter().enumerate() {
@@ -73,7 +73,7 @@ impl Lattice {
     /// Return the shortest distance between `pi` (point i) and the periodic
     /// images of `pj` (point j). This algorithm will loop over all relevant
     /// images
-    pub(crate) fn distance_brute_force(&mut self, pi: [f64; 3], pj: [f64; 3]) -> f64 {
+    pub(crate) fn distance_brute_force(&self, pi: [f64; 3], pj: [f64; 3]) -> f64 {
         let v = Vector3f::from(pj) - Vector3f::from(pi);
         let pmic = self.apply_mic_brute_force(v.into());
 
@@ -82,7 +82,7 @@ impl Lattice {
 
     /// Return the relevant periodic images required for neighborhood search
     /// within cutoff radius
-    pub(crate) fn relevant_images(&mut self, radius: f64) -> Vec<Vector3f> {
+    pub(crate) fn relevant_images(&self, radius: f64) -> Vec<Vector3f> {
         let ns = self.n_min_images(radius);
         let na = ns[0] as isize;
         let nb = ns[1] as isize;
@@ -103,7 +103,7 @@ impl Lattice {
 
     /// Return the mic vector and its length. This algorithm will loop over all
     /// relevant images.
-    pub(crate) fn apply_mic_brute_force(&mut self, p: [f64; 3]) -> Vector3f {
+    pub(crate) fn apply_mic_brute_force(&self, p: [f64; 3]) -> Vector3f {
         // Calculate the cutoff radius for relevant images.
         // Use the value from Tuckerman algorithm as cutoff radius, since it is
         // always larger than the real distance using minimum image convention
@@ -138,7 +138,7 @@ fn test_mic_distance() {
         [2.00000000, 3.46410162, 0.00000000],
         [2.00000000, 1.15470054, 3.26598632],
     ];
-    let mut lattice = Lattice::new(cell);
+    let lattice = Lattice::new(cell);
 
     // Safe distance range where Tuckermann algorithm will work
     let safe_r_max = 0.5 * lattice.widths().min();
@@ -164,7 +164,7 @@ fn test_mic_distance() {
 
 #[test]
 fn test_mic_vector() {
-    let mut lat = Lattice::new([
+    let lat = Lattice::new([
         [7.055000000, 0.000000, 0.00000000],
         [0.000000000, 6.795000, 0.00000000],
         [-1.14679575, 0.000000, 5.65182701],
@@ -181,7 +181,7 @@ fn test_mic_vector() {
 
 #[test]
 fn test_mic_distance_2() {
-    let mut lat = Lattice::new([[5.0, 0.0, 0.0], [1.0, 5.0, 0.0], [1.0, 1.0, 5.0]]);
+    let lat = Lattice::new([[5.0, 0.0, 0.0], [1.0, 5.0, 0.0], [1.0, 1.0, 5.0]]);
 
     // the shortest distance: 2.61383
     let d = lat.distance_tuckerman([0.; 3], [-0.94112, -4.34823, 2.53058]);
@@ -198,7 +198,7 @@ fn test_mic_distance_2() {
 
 #[test]
 fn test_neighborhood() {
-    let mut lat = Lattice::new([[18.256, 0., 0.], [0., 20.534, 0.], [0., 0., 15.084]]);
+    let lat = Lattice::new([[18.256, 0., 0.], [0., 20.534, 0.], [0., 0., 15.084]]);
     assert_eq!(true, lat.is_orthorhombic());
 
     assert_eq!([1, 1, 1], lat.n_min_images(9.));

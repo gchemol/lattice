@@ -18,7 +18,7 @@ fn test_mic_distance() {
         [2.00000000, 3.46410162, 0.00000000],
         [2.00000000, 1.15470054, 3.26598632],
     ];
-    let mut lattice = Lattice::new(cell);
+    let lattice = Lattice::new(cell);
 
     // Safe distance range where Tuckermann algorithm will work
     let safe_r_max = 0.5 * lattice.widths().min();

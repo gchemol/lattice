@@ -4,7 +4,7 @@
 use vecfx::*;
 
 // matrix inversion
-pub(crate) fn get_inv_matrix(matrix: Matrix3f) -> Matrix3f {
+pub(crate) fn get_inv_matrix(matrix: &Matrix3f) -> Matrix3f {
     matrix.try_inverse().expect("bad matrix")
 }
 
