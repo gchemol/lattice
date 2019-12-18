@@ -9,9 +9,9 @@ use approx::*;
 use crate::Lattice;
 // imports:1 ends here
 
-// distance
+// Tuckerman algorithm
 
-// [[file:~/Workspace/Programming/gchemol-rs/lattice/lattice.note::*distance][distance:1]]
+// [[file:~/Workspace/Programming/gchemol-rs/lattice/lattice.note::*Tuckerman algorithm][Tuckerman algorithm:1]]
 impl Lattice {
     /// Return the approximated mic vector using Tuckerman's algorithm.
     ///
@@ -20,7 +20,7 @@ impl Lattice {
     /// - Tuckerman, M. E. Statistical Mechanics: Theory and Molecular
     /// Simulation, 1 edition.; Oxford University Press: Oxford ; New York,
     /// 2010.
-    fn apply_mic_tuckerman(&mut self, p: [f64; 3]) -> Vector3f {
+    pub(crate) fn apply_mic_tuckerman(&mut self, p: [f64; 3]) -> Vector3f {
         // apply minimum image convention on the scaled coordinates
         let mut fcoords = self.to_frac(p);
 
@@ -36,48 +36,6 @@ impl Lattice {
         Vector3f::from(pij)
     }
 
-    // FIXME: remove type conversion
-    /// Return the mic vector. This algorithm will loop over all relevant images.
-    fn apply_mic_brute_force(&mut self, p: [f64; 3]) -> Vector3f {
-        // The cutoff radius for finding relevant images.
-        // Use the value from Tuckerman algorithm as cutoff radius, since it is
-        // always larger than the real distance using minimum image convention
-        let p = self.apply_mic_tuckerman(p);
-        let cutoff = p.norm();
-        let relevant_images = self.relevant_images(cutoff);
-
-        let mut target = (
-            std::f64::MAX,
-            Vector3f::from([0.0; 3]),
-            Vector3f::from([0.0; 3]),
-        );
-        for image in relevant_images {
-            let dd = self.to_cart(image.into());
-            let ip = [p[0] + dd[0], p[1] + dd[1], p[2] + dd[2]];
-
-            let v = Vector3f::from(ip);
-            let d = v.norm();
-            if d < target.0 {
-                target = (d, v, image);
-            }
-        }
-
-        target.1
-    }
-
-    /// Return the minimal number of images for neighborhood search on each cell
-    /// direction within cutoff radius
-    fn n_min_images(&mut self, radius: f64) -> [usize; 3] {
-        let mut ns = [0; 3];
-
-        for (i, &w) in self.widths().iter().enumerate() {
-            let n = (radius / w).ceil();
-            ns[i] = n as usize;
-        }
-
-        ns
-    }
-
     /// Return the distance between two points computed using the minimum image
     /// convention.
     ///
@@ -86,48 +44,40 @@ impl Lattice {
     /// - Tuckerman, M. E. Statistical Mechanics: Theory and Molecular
     /// Simulation, 1 edition.; Oxford University Press: Oxford ; New York,
     /// 2010.
-    fn distance_tuckerman(&mut self, pi: [f64; 3], pj: [f64; 3]) -> f64 {
+    pub(crate) fn distance_tuckerman(&mut self, pi: [f64; 3], pj: [f64; 3]) -> f64 {
         let pij = [pj[0] - pi[0], pj[1] - pi[1], pj[2] - pi[2]];
 
         let pmic = self.apply_mic_tuckerman(pij);
         pmic.norm()
     }
+}
+// Tuckerman algorithm:1 ends here
+
+// brute force
+
+// [[file:~/Workspace/Programming/gchemol-rs/lattice/lattice.note::*brute force][brute force:1]]
+impl Lattice {
+    /// Return the minimal number of images for neighborhood search on each cell
+    /// direction within cutoff radius
+    fn n_min_images(&mut self, radius: f64) -> [isize; 3] {
+        let mut ns = [0; 3];
+
+        for (i, &w) in self.widths().iter().enumerate() {
+            let n = (radius / w).ceil();
+            ns[i] = n as isize;
+        }
+
+        ns
+    }
 
     /// Return the shortest distance between `pi` (point i) and the periodic
     /// images of `pj` (point j). This algorithm will loop over all relevant
     /// images
-    fn distance_brute_force(&mut self, pi: [f64; 3], pj: [f64; 3]) -> f64 {
+    pub(crate) fn distance_brute_force(&mut self, pi: [f64; 3], pj: [f64; 3]) -> f64 {
         let v = Vector3f::from(pj) - Vector3f::from(pi);
         let pmic = self.apply_mic_brute_force(v.into());
 
         pmic.norm()
-    }
-
-    /// Return the shortest distance between `pi` (point i) and the periodic
-    /// images of `pj` (point j) under the minimum image convention
-    ///
-    /// Parameters
-    /// ----------
-    /// * pi, pj: Cartesian coordinates of point i and point j
-    pub fn distance(&mut self, pi: [f64; 3], pj: [f64; 3]) -> f64 {
-        let pmic = self.apply_mic([pj[0] - pi[0], pj[1] - pi[1], pj[2] - pi[2]]);
-        pmic.norm()
-    }
-
-    /// Return the shortest vector by applying the minimum image convention.
-    pub(crate) fn apply_mic(&mut self, p: [f64; 3]) -> Vector3f {
-        // Tuckerman algorithm works well for Orthorombic cell
-        let v_naive = self.apply_mic_tuckerman(p);
-        if self.is_orthorhombic() {
-            v_naive
-        } else {
-            let r_max = 0.5 * self.widths().min();
-            if v_naive.norm() < r_max {
-                v_naive
-            } else {
-                self.apply_mic_brute_force(p)
-            }
-        }
     }
 
     /// Return the relevant periodic images required for neighborhood search
@@ -151,14 +101,30 @@ impl Lattice {
         images
     }
 
-    /// Wrap a point to unit cell, obeying the periodic boundary conditions.
-    pub fn wrap(&mut self, vec: [f64; 3]) -> [f64; 3] {
-        let [fx, fy, fz] = self.to_frac(vec);
-        let fcoords_wrapped = [fx - fx.floor(), fy - fy.floor(), fz - fz.floor()];
-        self.to_cart(fcoords_wrapped)
+    /// Return the mic vector and its length. This algorithm will loop over all
+    /// relevant images.
+    pub(crate) fn apply_mic_brute_force(&mut self, p: [f64; 3]) -> Vector3f {
+        // Calculate the cutoff radius for relevant images.
+        // Use the value from Tuckerman algorithm as cutoff radius, since it is
+        // always larger than the real distance using minimum image convention
+        let p = self.apply_mic_tuckerman(p);
+        let cutoff = p.norm();
+        let [na, nb, nc] = self.n_min_images(cutoff);
+
+        // search the MIC point with minimum length among relevant image points
+        let points = vec![[p[0], p[1], p[2]]];
+        let relevant_points = self.replicate(&points, -na..=na, -nb..=nb, -nc..=nc);
+        let distances2: Vec<_> = relevant_points
+            .iter()
+            .map(|&p| Vector3f::from(p).norm_squared())
+            .collect();
+        let i = distances2.imin();
+        let pmin = relevant_points[i];
+
+        pmin.into()
     }
 }
-// distance:1 ends here
+// brute force:1 ends here
 
 // test
 
@@ -273,24 +239,5 @@ fn test_neighborhood() {
     let images = lat.relevant_images(3.0);
     assert_eq!(expected.len(), images.len());
     assert_eq!(expected[1][2], images[1][2]);
-}
-
-#[test]
-// adopted from lumol
-fn test_wrap() {
-    // Cubic unit cell
-    let mut cell = Lattice::from_params(10.0, 10.0, 10.0, 90.0, 90.0, 90.0);
-    let wrapped: Vector3f = cell.wrap([9.0, 18.0, -6.0]).into();
-    assert_relative_eq!(wrapped, Vector3f::from([9.0, 8.0, 4.0]), epsilon = 1e-4);
-
-    // Orthorhombic unit cell
-    let mut cell = Lattice::from_params(3.0, 4.0, 5.0, 90.0, 90.0, 90.0);
-    let wrapped: Vector3f = cell.wrap([1.0, 1.5, 6.0]).into();
-    assert_relative_eq!(wrapped, Vector3f::from([1.0, 1.5, 1.0]), epsilon = 1e-4);
-
-    // Triclinic unit cell
-    let mut cell = Lattice::from_params(3.0, 4.0, 5.0, 90.0, 90.0, 90.0);
-    let wrapped: Vector3f = cell.wrap([1.0, 1.5, 6.0]).into();
-    assert_relative_eq!(wrapped, Vector3f::from([1.0, 1.5, 1.0]), epsilon = 1e-4);
 }
 // test:1 ends here

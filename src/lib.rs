@@ -10,7 +10,7 @@
 //        AUTHOR:  Wenping Guo <ybyygu@gmail.com>
 //       LICENCE:  GPL version 3
 //       CREATED:  <2018-04-29 14:27>
-//       UPDATED:  <2019-12-18 Wed 09:30>
+//       UPDATED:  <2019-12-18 Wed 19:57>
 //===============================================================================#
 // header:1 ends here
 
@@ -26,13 +26,14 @@ use vecfx::*;
 // [[file:~/Workspace/Programming/gchemol-rs/lattice/lattice.note::*mods][mods:1]]
 mod mic;
 mod utils;
+mod supercell;
 
 use crate::utils::*;
 // mods:1 ends here
 
-// base
+// api
 
-// [[file:~/Workspace/Programming/gchemol-rs/lattice/lattice.note::*base][base:1]]
+// [[file:~/Workspace/Programming/gchemol-rs/lattice/lattice.note::*api][api:1]]
 /// Periodic 3D lattice
 #[derive(Debug, Clone, Copy, Deserialize, Serialize)]
 pub struct Lattice {
@@ -229,5 +230,39 @@ impl Lattice {
         let m = Matrix3f::from_diagonal(&diag);
         m == self.matrix
     }
+
+    /// Wrap a point to unit cell, obeying the periodic boundary conditions.
+    pub fn wrap(&mut self, vec: [f64; 3]) -> [f64; 3] {
+        let [fx, fy, fz] = self.to_frac(vec);
+        let fcoords_wrapped = [fx - fx.floor(), fy - fy.floor(), fz - fz.floor()];
+        self.to_cart(fcoords_wrapped)
+    }
+
+    /// Return the shortest distance between `pi` (point i) and the periodic
+    /// images of `pj` (point j) under the minimum image convention
+    ///
+    /// Parameters
+    /// ----------
+    /// * pi, pj: Cartesian coordinates of point i and point j
+    pub fn distance(&mut self, pi: [f64; 3], pj: [f64; 3]) -> f64 {
+        let pmic = self.apply_mic([pj[0] - pi[0], pj[1] - pi[1], pj[2] - pi[2]]);
+        pmic.norm()
+    }
+
+    /// Return the shortest vector by applying the minimum image convention.
+    pub fn apply_mic(&mut self, p: [f64; 3]) -> Vector3f {
+        // Tuckerman algorithm works well for Orthorombic cell
+        let v_naive = self.apply_mic_tuckerman(p);
+        if self.is_orthorhombic() {
+            v_naive
+        } else {
+            let r_max = 0.5 * self.widths().min();
+            if v_naive.norm() < r_max {
+                v_naive
+            } else {
+                self.apply_mic_brute_force(p)
+            }
+        }
+    }
 }
-// base:1 ends here
+// api:1 ends here

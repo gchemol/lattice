@@ -11,6 +11,7 @@ authors = ["Wenping Guo <ybyygu@gmail.com>"]
 serde = {version="1", features = ["derive"]}
 vecfx = { git = "https://github.com/gchemol/vecfx.git", features = ["nalgebra"] }
 guts = { git = "https://github.com/ybyygu/guts.git" }
+# guts = { path = "../../guts" }
 
 [dev-dependencies]
 approx = { version = "0.3" }

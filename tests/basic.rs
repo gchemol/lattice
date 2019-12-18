@@ -16,6 +16,9 @@ fn test_lattice_construct() {
     lat.set_origin(loc);
     assert_eq!(loc, lat.origin());
 
+    let lat = Lattice::new([[18.256, 0., 0.], [0., 20.534, 0.], [0., 0., 15.084]]);
+    assert_eq!(true, lat.is_orthorhombic());
+
     let mut lat = Lattice::new([[15.3643, 0., 0.], [4.5807, 15.5026, 0.], [0., 0., 17.4858]]);
 
     let [a, b, c] = lat.lengths();
@@ -68,5 +71,24 @@ fn test_lattice_frac_cart() {
     assert_relative_eq!(coords[0], 2.1832, epsilon = 1e-3);
     assert_relative_eq!(coords[1], 1.6850, epsilon = 1e-3);
     assert_relative_eq!(coords[2], 3.8505, epsilon = 1e-3);
+}
+
+#[test]
+// adopted from lumol
+fn test_wrap() {
+    // Cubic unit cell
+    let mut cell = Lattice::from_params(10.0, 10.0, 10.0, 90.0, 90.0, 90.0);
+    let wrapped: Vector3f = cell.wrap([9.0, 18.0, -6.0]).into();
+    assert_relative_eq!(wrapped, Vector3f::from([9.0, 8.0, 4.0]), epsilon = 1e-4);
+
+    // Orthorhombic unit cell
+    let mut cell = Lattice::from_params(3.0, 4.0, 5.0, 90.0, 90.0, 90.0);
+    let wrapped: Vector3f = cell.wrap([1.0, 1.5, 6.0]).into();
+    assert_relative_eq!(wrapped, Vector3f::from([1.0, 1.5, 1.0]), epsilon = 1e-4);
+
+    // Triclinic unit cell
+    let mut cell = Lattice::from_params(3.0, 4.0, 5.0, 90.0, 90.0, 90.0);
+    let wrapped: Vector3f = cell.wrap([1.0, 1.5, 6.0]).into();
+    assert_relative_eq!(wrapped, Vector3f::from([1.0, 1.5, 1.0]), epsilon = 1e-4);
 }
 // basic.rs:1 ends here

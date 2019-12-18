@@ -36,4 +36,13 @@ pub(crate) fn get_cell_angles(mat: Matrix3f) -> [f64; 3] {
         va.angle(&vb).to_degrees(),
     ]
 }
+
+// for debug purpose
+pub(crate) fn print_xyz(points: &[[f64; 3]]) {
+    println!("{}", points.len());
+    println!("xyz");
+    for [x, y, z] in points.iter() {
+        println!("He {:10.4}\t{:10.4}\t{:10.4}", x, y, z);
+    }
+}
 // core:1 ends here
