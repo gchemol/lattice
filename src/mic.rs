@@ -31,9 +31,7 @@ impl Lattice {
         }
 
         // transform back to cartesian coordinates
-        let pij = self.to_cart(fcoords);
-
-        Vector3f::from(pij)
+        self.to_cart(fcoords)
     }
 
     /// Return the distance between two points computed using the minimum image

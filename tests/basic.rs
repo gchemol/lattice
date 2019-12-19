@@ -14,16 +14,13 @@ fn test_lattice_construct() {
     let mut lat = Lattice::default();
     let loc = [1.0, 2.0, 3.0];
     lat.set_origin(loc);
-    assert_eq!(loc, lat.origin());
 
     let lat = Lattice::new([[18.256, 0., 0.], [0., 20.534, 0.], [0., 0., 15.084]]);
     assert_eq!(true, lat.is_orthorhombic());
 
     let lat = Lattice::new([[15.3643, 0., 0.], [4.5807, 15.5026, 0.], [0., 0., 17.4858]]);
-
     let [a, b, c] = lat.lengths();
     assert_eq!(false, lat.is_orthorhombic());
-
     assert_relative_eq!(a, 15.3643, epsilon = 1e-4);
     assert_relative_eq!(b, 16.1652, epsilon = 1e-4);
     assert_relative_eq!(c, 17.4858, epsilon = 1e-4);
@@ -41,12 +38,15 @@ fn test_lattice_construct() {
 #[test]
 fn test_lattice_volume() {
     let vts = [[5., 0., 0.], [5., 5., 0.], [1., 0., 5.]];
-
     let mut lat = Lattice::new(vts);
-    assert_eq!(vts, lat.vectors());
-    assert_eq!(vts[0], lat.vector_a());
-    assert_eq!(vts[1], lat.vector_b());
-    assert_eq!(vts[2], lat.vector_c());
+    let mat: Matrix3f = vts.into();
+    assert_eq!(mat, lat.matrix());
+    let va: [f64; 3] = lat.vector_a().into();
+    let vb: [f64; 3] = lat.vector_b().into();
+    let vc: [f64; 3] = lat.vector_c().into();
+    assert_eq!(vts[0], va);
+    assert_eq!(vts[1], vb);
+    assert_eq!(vts[2], vc);
 
     assert_relative_eq!(125.0, lat.volume(), epsilon = 1e-4);
     lat.scale_by(4.);
@@ -83,12 +83,12 @@ fn test_wrap() {
 
     // Orthorhombic unit cell
     let cell = Lattice::from_params(3.0, 4.0, 5.0, 90.0, 90.0, 90.0);
-    let wrapped: Vector3f = cell.wrap([1.0, 1.5, 6.0]).into();
+    let wrapped = cell.wrap([1.0, 1.5, 6.0]);
     assert_relative_eq!(wrapped, Vector3f::from([1.0, 1.5, 1.0]), epsilon = 1e-4);
 
     // Triclinic unit cell
     let cell = Lattice::from_params(3.0, 4.0, 5.0, 90.0, 90.0, 90.0);
-    let wrapped: Vector3f = cell.wrap([1.0, 1.5, 6.0]).into();
+    let wrapped = cell.wrap([1.0, 1.5, 6.0]);
     assert_relative_eq!(wrapped, Vector3f::from([1.0, 1.5, 1.0]), epsilon = 1e-4);
 }
 // basic.rs:1 ends here

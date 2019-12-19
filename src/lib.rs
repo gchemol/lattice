@@ -10,7 +10,7 @@
 //        AUTHOR:  Wenping Guo <ybyygu@gmail.com>
 //       LICENCE:  GPL version 3
 //       CREATED:  <2018-04-29 14:27>
-//       UPDATED:  <2019-12-18 Wed 21:14>
+//       UPDATED:  <2019-12-19 Thu 09:28>
 //===============================================================================#
 // header:1 ends here
 
@@ -114,25 +114,20 @@ impl Lattice {
     }
 
     /// Set cell origin in Cartesian coordinates
-    pub fn set_origin(&mut self, loc: [f64; 3]) {
-        self.origin = Vector3f::from(loc);
+    pub fn set_origin<T: Into<Vector3f>>(&mut self, loc: T) {
+        self.origin = loc.into()
     }
 
     /// Lattice length parameters: a, b, c
     pub fn lengths(&self) -> [f64; 3] {
-        let lengths = get_cell_lengths(self.matrix);
-
-        [lengths[0], lengths[1], lengths[2]]
+        get_cell_lengths(self.matrix).into()
     }
 
     /// Lattice angle parameters in degrees
     pub fn angles(&self) -> [f64; 3] {
-        let angles = get_cell_angles(self.matrix);
-
-        [angles[0], angles[1], angles[2]]
+        get_cell_angles(self.matrix).into()
     }
 
-    // FIXME: cell widths
     /// Scale Lattice by a positive constant
     pub fn scale_by(&mut self, v: f64) {
         debug_assert!(v > 0.);
@@ -141,43 +136,38 @@ impl Lattice {
     }
 
     /// Get cell origin in Cartesian coordinates
-    pub fn origin(&self) -> [f64; 3] {
-        self.origin.into()
+    pub fn origin(&self) -> Vector3f {
+        self.origin
     }
 
     /// Returns the fractional coordinates given cartesian coordinates.
-    pub fn to_frac(&self, p: [f64; 3]) -> [f64; 3] {
-        let v = Vector3f::from(p);
-        let fs = self.inv_matrix * (v - self.origin);
-        fs.into()
+    pub fn to_frac<T: Into<Vector3f>>(&self, p: T) -> Vector3f {
+        self.inv_matrix * (p.into() - self.origin)
     }
 
     /// Returns the cartesian coordinates given fractional coordinates.
-    pub fn to_cart(&self, p: [f64; 3]) -> [f64; 3] {
-        let v = Vector3f::from(p);
-        let fs = self.matrix * v + self.origin;
-
-        fs.into()
+    pub fn to_cart<T: Into<Vector3f>>(&self, p: T) -> Vector3f {
+        self.matrix * p.into() + self.origin
     }
 
     /// Lattice vector a
-    pub fn vector_a(&self) -> [f64; 3] {
-        self.matrix.column(0).transpose().into()
+    pub fn vector_a(&self) -> Vector3f {
+        self.matrix.column(0).into()
     }
 
     /// Lattice vector b
-    pub fn vector_b(&self) -> [f64; 3] {
-        self.matrix.column(1).transpose().into()
+    pub fn vector_b(&self) -> Vector3f {
+        self.matrix.column(1).into()
     }
 
     /// Lattice vector c
-    pub fn vector_c(&self) -> [f64; 3] {
-        self.matrix.column(2).transpose().into()
+    pub fn vector_c(&self) -> Vector3f {
+        self.matrix.column(2).into()
     }
 
     /// Lattice vectors
-    pub fn vectors(&self) -> [[f64; 3]; 3] {
-        self.matrix.into()
+    pub fn matrix(&self) -> Matrix3f {
+        self.matrix
     }
 
     /// Check if lattice is orthorhombic
@@ -187,10 +177,10 @@ impl Lattice {
         m == self.matrix
     }
 
-    /// Wrap a point to unit cell, obeying the periodic boundary conditions.
-    pub fn wrap(&self, vec: [f64; 3]) -> [f64; 3] {
-        let [fx, fy, fz] = self.to_frac(vec);
-        let fcoords_wrapped = [fx - fx.floor(), fy - fy.floor(), fz - fz.floor()];
+    /// Wrap a point into unit cell, obeying the periodic boundary conditions.
+    pub fn wrap<T: Into<Vector3f>>(&self, vec: T) -> Vector3f {
+        let f = self.to_frac(vec);
+        let fcoords_wrapped = [f.x - f.x.floor(), f.y - f.y.floor(), f.z - f.z.floor()];
         self.to_cart(fcoords_wrapped)
     }
 
@@ -200,13 +190,15 @@ impl Lattice {
     /// Parameters
     /// ----------
     /// * pi, pj: Cartesian coordinates of point i and point j
-    pub fn distance(&self, pi: [f64; 3], pj: [f64; 3]) -> f64 {
-        let pmic = self.apply_mic([pj[0] - pi[0], pj[1] - pi[1], pj[2] - pi[2]]);
+    pub fn distance<T: Into<Vector3f>>(&self, pi: T, pj: T) -> f64 {
+        let p = pj.into() - pi.into();
+        let pmic = self.apply_mic(p);
         pmic.norm()
     }
 
-    /// Return the shortest vector by applying the minimum image convention.
-    pub fn apply_mic(&self, p: [f64; 3]) -> Vector3f {
+    /// Return the shortest vector obeying the minimum image convention.
+    pub fn apply_mic<T: Into<[f64; 3]>>(&self, p: T) -> Vector3f {
+        let p = p.into();
         // Tuckerman algorithm works well for Orthorombic cell
         let v_naive = self.apply_mic_tuckerman(p);
         if self.is_orthorhombic() {

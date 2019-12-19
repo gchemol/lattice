@@ -3,25 +3,25 @@
 // [[file:~/Workspace/Programming/gchemol-rs/lattice/lattice.note::*base][base:1]]
 use crate::Lattice;
 use guts::itertools::*;
-
-type Point = [f64; 3];
+use vecfx::Vector3f;
 
 impl Lattice {
     /// Create a supercell along three cell directions.
-    pub fn replicate(
+    pub fn replicate<T: Into<Vector3f> + Copy>(
         &self,
-        points: &[Point],
+        points: &[T],
         ra: impl Iterator<Item = isize> + Clone,
         rb: impl Iterator<Item = isize> + Clone,
         rc: impl Iterator<Item = isize> + Clone,
-    ) -> Vec<Point> {
+    ) -> Vec<Vector3f> {
         iproduct!(ra, rb, rc)
             .flat_map(|(i, j, k)| {
                 let v = [i as f64, j as f64, k as f64];
-                let [tx, ty, tz] = self.to_cart(v);
-                points
-                    .iter()
-                    .map(move |[x0, y0, z0]| [x0 + tx, y0 + ty, z0 + tz])
+                // let [tx, ty, tz]: [f64; 3] = self.to_cart(v).into();
+                let tv = self.to_cart(v);
+                points.iter().map(move |&p| {
+                    tv + p.into()
+                })
             })
             .collect()
     }
