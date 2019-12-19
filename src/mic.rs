@@ -80,16 +80,16 @@ impl Lattice {
 
     /// Return the relevant periodic images required for neighborhood search
     /// within cutoff radius
-    pub(crate) fn relevant_images(&self, radius: f64) -> Vec<Vector3f> {
+    pub fn relevant_images(&self, radius: f64) -> Vec<Vector3f> {
         let ns = self.n_min_images(radius);
         let na = ns[0] as isize;
         let nb = ns[1] as isize;
         let nc = ns[2] as isize;
 
         let mut images = vec![];
-        for i in (-na)..(na + 1) {
-            for j in (-nb)..(nb + 1) {
-                for k in (-nc)..(nc + 1) {
+        for i in -na..=na {
+            for j in -nb..=nb {
+                for k in -nc..=nc {
                     let v = Vector3f::from([i as f64, j as f64, k as f64]);
                     images.push(v);
                 }
