@@ -80,6 +80,7 @@ impl Lattice {
 
     /// Return the relevant periodic images required for neighborhood search
     /// within cutoff radius
+    #[cfg(feature = "adhoc")]
     pub fn relevant_images(&self, radius: f64) -> Vec<Vector3f> {
         let ns = self.n_min_images(radius);
         let na = ns[0] as isize;

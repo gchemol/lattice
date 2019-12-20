@@ -15,4 +15,8 @@ guts = { git = "https://github.com/ybyygu/guts.git" }
 
 [dev-dependencies]
 approx = { version = "0.3" }
+
+[features]
+# for adhoc hacking
+adhoc = []
 # cargo:1 ends here

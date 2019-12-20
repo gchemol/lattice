@@ -17,15 +17,28 @@ impl Lattice {
         iproduct!(ra, rb, rc)
             .flat_map(|(i, j, k)| {
                 let v = [i as f64, j as f64, k as f64];
-                // let [tx, ty, tz]: [f64; 3] = self.to_cart(v).into();
                 let tv = self.to_cart(v);
-                points.iter().map(move |&p| {
-                    tv + p.into()
-                })
+                points.iter().map(move |&p| tv + p.into())
             })
             .collect()
     }
+
+    #[cfg(feature = "adhoc")]
+    /// Create a supercell along three cell directions.
+    pub fn replicate_images(
+        &self,
+        ra: impl Iterator<Item = isize> + Clone,
+        rb: impl Iterator<Item = isize> + Clone,
+        rc: impl Iterator<Item = isize> + Clone,
+    ) -> impl Iterator<Item = Image> {
+        iproduct!(ra, rb, rc).map(|(i, j, k)| Image(i, j, k))
+    }
 }
+
+#[cfg(feature = "adhoc")]
+/// Helper struct for periodic image
+#[derive(Clone, Copy, Debug)]
+pub struct Image(pub isize, pub isize, pub isize);
 // base:1 ends here
 
 // test

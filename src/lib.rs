@@ -10,7 +10,7 @@
 //        AUTHOR:  Wenping Guo <ybyygu@gmail.com>
 //       LICENCE:  GPL version 3
 //       CREATED:  <2018-04-29 14:27>
-//       UPDATED:  <2019-12-19 Thu 09:28>
+//       UPDATED:  <2019-12-20 Fri 14:15>
 //===============================================================================#
 // header:1 ends here
 
@@ -25,8 +25,8 @@ use vecfx::*;
 
 // [[file:~/Workspace/Programming/gchemol-rs/lattice/lattice.note::*mods][mods:1]]
 mod mic;
-mod utils;
 mod supercell;
+mod utils;
 
 use crate::utils::*;
 // mods:1 ends here
@@ -177,11 +177,20 @@ impl Lattice {
         m == self.matrix
     }
 
-    /// Wrap a point into unit cell, obeying the periodic boundary conditions.
+    /// Wrap a point in cartesian coordinates into unit cell, obeying the
+    /// periodic boundary conditions. Returns cartesian coordinates.
     pub fn wrap<T: Into<Vector3f>>(&self, vec: T) -> Vector3f {
         let f = self.to_frac(vec);
-        let fcoords_wrapped = [f.x - f.x.floor(), f.y - f.y.floor(), f.z - f.z.floor()];
+        let fcoords_wrapped = self.wrap_frac(f);
         self.to_cart(fcoords_wrapped)
+    }
+
+    /// Wrap a point in fractional coordinates into unit cell, obeying the
+    /// periodic boundary conditions. Returns fractional coordinates.
+    pub fn wrap_frac<T: Into<Vector3f>>(&self, f: T) -> Vector3f {
+        let f = f.into();
+        let fcoords_wrapped = [f.x - f.x.floor(), f.y - f.y.floor(), f.z - f.z.floor()];
+        fcoords_wrapped.into()
     }
 
     /// Return the shortest distance between `pi` (point i) and the periodic
