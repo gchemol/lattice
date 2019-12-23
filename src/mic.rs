@@ -78,27 +78,26 @@ impl Lattice {
         pmic.norm()
     }
 
-    /// Return the relevant periodic images required for neighborhood search
-    /// within cutoff radius
-    #[cfg(feature = "adhoc")]
-    pub fn relevant_images(&self, radius: f64) -> Vec<Vector3f> {
-        let ns = self.n_min_images(radius);
-        let na = ns[0] as isize;
-        let nb = ns[1] as isize;
-        let nc = ns[2] as isize;
+    // /// Return the relevant periodic images required for neighborhood search
+    // /// within cutoff radius
+    // fn relevant_images(&self, radius: f64) -> Vec<Vector3f> {
+    //     let ns = self.n_min_images(radius);
+    //     let na = ns[0] as isize;
+    //     let nb = ns[1] as isize;
+    //     let nc = ns[2] as isize;
 
-        let mut images = vec![];
-        for i in -na..=na {
-            for j in -nb..=nb {
-                for k in -nc..=nc {
-                    let v = Vector3f::from([i as f64, j as f64, k as f64]);
-                    images.push(v);
-                }
-            }
-        }
+    //     let mut images = vec![];
+    //     for i in -na..=na {
+    //         for j in -nb..=nb {
+    //             for k in -nc..=nc {
+    //                 let v = Vector3f::from([i as f64, j as f64, k as f64]);
+    //                 images.push(v);
+    //             }
+    //         }
+    //     }
 
-        images
-    }
+    //     images
+    // }
 
     /// Return the mic vector and its length. This algorithm will loop over all
     /// relevant images.
@@ -111,8 +110,10 @@ impl Lattice {
         let [na, nb, nc] = self.n_min_images(cutoff);
 
         // search the MIC point with minimum length among relevant image points
-        let points = vec![[p[0], p[1], p[2]]];
-        let relevant_points = self.replicate(&points, -na..=na, -nb..=nb, -nc..=nc);
+        let relevant_points: Vec<Vector3f> = self
+            .replicate(-na..=na, -nb..=nb, -nc..=nc)
+            .map(|image| p + self.to_cart(image))
+            .collect();
         let distances2: Vec<_> = relevant_points
             .iter()
             .map(|&p| Vector3f::from(p).norm_squared())
@@ -204,39 +205,5 @@ fn test_neighborhood() {
     assert_eq!([2, 1, 2], lat.n_min_images(19.));
     assert_eq!([2, 1, 2], lat.n_min_images(20.));
     assert_eq!([2, 2, 2], lat.n_min_images(20.6));
-
-    let expected = [
-        Vector3f::new(-1.0, -1.0, -1.0),
-        Vector3f::new(-1.0, -1.0, 0.0),
-        Vector3f::new(-1.0, -1.0, 1.0),
-        Vector3f::new(-1.0, 0.0, -1.0),
-        Vector3f::new(-1.0, 0.0, 0.0),
-        Vector3f::new(-1.0, 0.0, 1.0),
-        Vector3f::new(-1.0, 1.0, -1.0),
-        Vector3f::new(-1.0, 1.0, 0.0),
-        Vector3f::new(-1.0, 1.0, 1.0),
-        Vector3f::new(0.0, -1.0, -1.0),
-        Vector3f::new(0.0, -1.0, 0.0),
-        Vector3f::new(0.0, -1.0, 1.0),
-        Vector3f::new(0.0, 0.0, -1.0),
-        Vector3f::new(0.0, 0.0, 0.0),
-        Vector3f::new(0.0, 0.0, 1.0),
-        Vector3f::new(0.0, 1.0, -1.0),
-        Vector3f::new(0.0, 1.0, 0.0),
-        Vector3f::new(0.0, 1.0, 1.0),
-        Vector3f::new(1.0, -1.0, -1.0),
-        Vector3f::new(1.0, -1.0, 0.0),
-        Vector3f::new(1.0, -1.0, 1.0),
-        Vector3f::new(1.0, 0.0, -1.0),
-        Vector3f::new(1.0, 0.0, 0.0),
-        Vector3f::new(1.0, 0.0, 1.0),
-        Vector3f::new(1.0, 1.0, -1.0),
-        Vector3f::new(1.0, 1.0, 0.0),
-        Vector3f::new(1.0, 1.0, 1.0),
-    ];
-
-    let images = lat.relevant_images(3.0);
-    assert_eq!(expected.len(), images.len());
-    assert_eq!(expected[1][2], images[1][2]);
 }
 // test:1 ends here
