@@ -10,7 +10,7 @@
 //        AUTHOR:  Wenping Guo <ybyygu@gmail.com>
 //       LICENCE:  GPL version 3
 //       CREATED:  <2018-04-29 14:27>
-//       UPDATED:  <2019-12-23 Mon 10:26>
+//       UPDATED:  <2020-01-09 Thu 09:35>
 //===============================================================================#
 // header:1 ends here
 
@@ -163,6 +163,11 @@ impl Lattice {
     /// Lattice vector c
     pub fn vector_c(&self) -> Vector3f {
         self.matrix.column(2).into()
+    }
+
+    /// Three lattice vectors.
+    pub fn vectors(&self) -> [Vector3f; 3] {
+        [self.vector_a(), self.vector_b(), self.vector_c()]
     }
 
     /// Lattice vectors
