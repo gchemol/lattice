@@ -9,9 +9,8 @@ authors = ["Wenping Guo <ybyygu@gmail.com>"]
 
 [dependencies]
 serde = {version="1", features = ["derive"]}
-vecfx = { git = "https://github.com/gchemol/vecfx.git", features = ["nalgebra"] }
-guts = { git = "https://github.com/ybyygu/guts.git" }
-# guts = { path = "../../guts" }
+vecfx = { version="0.0.8", features = ["nalgebra"] }
+gchemol-gut = "0.0.7"
 
 [dev-dependencies]
 approx = { version = "0.3" }
