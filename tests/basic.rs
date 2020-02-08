@@ -4,7 +4,7 @@
 // :END:
 
 // [[file:~/Workspace/Programming/gchemol-rs/lattice/lattice.note::*basic.rs][basic.rs:1]]
-use lattice::Lattice;
+use gchemol_lattice::Lattice;
 
 use approx::*;
 use vecfx::*;
