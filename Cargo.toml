@@ -3,7 +3,7 @@
 # [[file:~/Workspace/Programming/gchemol-rs/lattice/lattice.note::*cargo][cargo:1]]
 [package]
 name = "gchemol-lattice"
-version = "0.0.4"
+version = "0.0.5"
 edition = "2018"
 authors = ["Wenping Guo <ybyygu@gmail.com>"]
 description = "Periodic 3D crystal lattice"
@@ -14,7 +14,7 @@ license = "MIT OR Apache-2.0"
 [dependencies]
 serde = {version="1", features = ["derive"]}
 vecfx = {version="0.0.8", features = ["nalgebra"]}
-gchemol-gut = "0.0.7"
+gchemol-gut = "0.0.8"
 
 [dev-dependencies]
 approx = "0.3"
