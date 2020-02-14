@@ -3,23 +3,23 @@
 # [[file:~/Workspace/Programming/gchemol-rs/lattice/lattice.note::*cargo][cargo:1]]
 [package]
 name = "gchemol-lattice"
-version = "0.0.5"
+version = "0.0.6"
 edition = "2018"
 authors = ["Wenping Guo <ybyygu@gmail.com>"]
 description = "Periodic 3D crystal lattice"
 homepage = "https://github.com/gchemol/lattice"
 repository = "https://github.com/gchemol/lattice"
 license = "MIT OR Apache-2.0"
+exclude = ["bin/*", "docs/*", "ltxpng/*", "data/*"]
 
 [dependencies]
 serde = {version="1", features = ["derive"]}
 vecfx = {version="0.0.8", features = ["nalgebra"]}
-gchemol-gut = "0.0.8"
+gchemol-gut = "0.1"
 
 [dev-dependencies]
 approx = "0.3"
 
 [features]
-# for adhoc hacking
-adhoc = []
+adhoc = [] # for adhoc hacking
 # cargo:1 ends here

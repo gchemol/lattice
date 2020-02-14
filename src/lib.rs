@@ -10,7 +10,7 @@
 //        AUTHOR:  Wenping Guo <ybyygu@gmail.com>
 //       LICENCE:  GPL version 3
 //       CREATED:  <2018-04-29 14:27>
-//       UPDATED:  <2020-02-07 Fri 15:54>
+//       UPDATED:  <2020-02-14 Fri 12:19>
 //===============================================================================#
 // header:1 ends here
 
@@ -62,7 +62,15 @@ impl Default for Lattice {
 
 // [[file:~/Workspace/Programming/gchemol-rs/lattice/lattice.note::*api][api:1]]
 impl Lattice {
-    pub fn new<T: Into<Matrix3f>>(tvs: T) -> Self {
+    /// Construct `Lattice` from three lattice vectors.
+    pub fn new<T: Into<Vector3f> + Copy>(tvs: [T; 3]) -> Self {
+        let vectors = [tvs[0].into(), tvs[1].into(), tvs[2].into()];
+        let matrix = Matrix3f::from_columns(&vectors);
+        Self::from_matrix(matrix)
+    }
+
+    /// Construct `Lattice` from lattice matrix (3x3).
+    pub fn from_matrix<T: Into<Matrix3f>>(tvs: T) -> Self {
         let matrix = tvs.into();
         let inv_matrix = get_inv_matrix(&matrix);
         Lattice {

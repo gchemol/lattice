@@ -33,6 +33,11 @@ fn test_lattice_construct() {
     let lat = Lattice::from_params(a, b, c, alpha, beta, gamma);
     assert_eq!([a, b, c], lat.lengths());
     assert_eq!([alpha, beta, gamma], lat.angles());
+
+    let vectors = lat.vectors();
+    let _ = Lattice::new(vectors);
+    let mat = lat.matrix();
+    let _ = Lattice::from_matrix(mat);
 }
 
 #[test]
