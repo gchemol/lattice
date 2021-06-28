@@ -1,6 +1,4 @@
-// header
-
-// [[file:~/Workspace/Programming/gchemol-rs/lattice/lattice.note::*header][header:1]]
+// [[file:../lattice.note::*header][header:1]]
 //===============================================================================#
 //   DESCRIPTION:  Represents 3D periodic lattice
 //
@@ -10,20 +8,16 @@
 //        AUTHOR:  Wenping Guo <ybyygu@gmail.com>
 //       LICENCE:  GPL version 3
 //       CREATED:  <2018-04-29 14:27>
-//       UPDATED:  <2020-02-14 Fri 12:19>
+//       UPDATED:  <2021-06-17 Thu 17:08>
 //===============================================================================#
 // header:1 ends here
 
-// imports
-
-// [[file:~/Workspace/Programming/gchemol-rs/lattice/lattice.note::*imports][imports:1]]
+// [[file:../lattice.note::*imports][imports:1]]
 use gchemol_gut::prelude::*;
 use vecfx::*;
 // imports:1 ends here
 
-// mods
-
-// [[file:~/Workspace/Programming/gchemol-rs/lattice/lattice.note::*mods][mods:1]]
+// [[file:../lattice.note::*mods][mods:1]]
 mod mic;
 mod supercell;
 mod utils;
@@ -31,9 +25,7 @@ mod utils;
 use crate::utils::*;
 // mods:1 ends here
 
-// base
-
-// [[file:~/Workspace/Programming/gchemol-rs/lattice/lattice.note::*base][base:1]]
+// [[file:../lattice.note::*base][base:1]]
 /// Periodic 3D lattice
 #[derive(Debug, Clone, Copy, Deserialize, Serialize)]
 pub struct Lattice {
@@ -58,9 +50,7 @@ impl Default for Lattice {
 }
 // base:1 ends here
 
-// api
-
-// [[file:~/Workspace/Programming/gchemol-rs/lattice/lattice.note::*api][api:1]]
+// [[file:../lattice.note::*api][api:1]]
 impl Lattice {
     /// Construct `Lattice` from three lattice vectors.
     pub fn new<T: Into<Vector3f> + Copy>(tvs: [T; 3]) -> Self {
@@ -181,6 +171,11 @@ impl Lattice {
     /// Lattice vectors
     pub fn matrix(&self) -> Matrix3f {
         self.matrix
+    }
+
+    /// inverse of lattice matrix
+    pub fn inv_matrix(&self) -> Matrix3f {
+        self.inv_matrix
     }
 
     /// Check if lattice is orthorhombic
