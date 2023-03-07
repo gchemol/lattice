@@ -1,6 +1,4 @@
-// header
-
-// [[file:~/Workspace/Programming/gchemol-rs/lattice/lattice.note::*header][header:1]]
+// [[file:../lattice.note::*header][header:1]]
 //===============================================================================#
 //   DESCRIPTION:  Represents 3D periodic lattice
 //
@@ -10,20 +8,16 @@
 //        AUTHOR:  Wenping Guo <ybyygu@gmail.com>
 //       LICENCE:  GPL version 3
 //       CREATED:  <2018-04-29 14:27>
-//       UPDATED:  <2020-01-09 Thu 09:35>
+//       UPDATED:  <>
 //===============================================================================#
 // header:1 ends here
 
-// imports
-
-// [[file:~/Workspace/Programming/gchemol-rs/lattice/lattice.note::*imports][imports:1]]
-use guts::prelude::*;
+// [[file:../lattice.note::*imports][imports:1]]
+use gchemol_gut::prelude::*;
 use vecfx::*;
 // imports:1 ends here
 
-// mods
-
-// [[file:~/Workspace/Programming/gchemol-rs/lattice/lattice.note::*mods][mods:1]]
+// [[file:../lattice.note::*mods][mods:1]]
 mod mic;
 mod supercell;
 mod utils;
@@ -31,9 +25,7 @@ mod utils;
 use crate::utils::*;
 // mods:1 ends here
 
-// base
-
-// [[file:~/Workspace/Programming/gchemol-rs/lattice/lattice.note::*base][base:1]]
+// [[file:../lattice.note::*base][base:1]]
 /// Periodic 3D lattice
 #[derive(Debug, Clone, Copy, Deserialize, Serialize)]
 pub struct Lattice {
@@ -58,12 +50,18 @@ impl Default for Lattice {
 }
 // base:1 ends here
 
-// api
-
-// [[file:~/Workspace/Programming/gchemol-rs/lattice/lattice.note::*api][api:1]]
+// [[file:../lattice.note::f072864d][f072864d]]
 impl Lattice {
-    pub fn new<T: Into<[[f64; 3]; 3]>>(tvs: T) -> Self {
-        let matrix = Matrix3f::from(tvs.into());
+    /// Construct `Lattice` from three lattice vectors.
+    pub fn new<T: Into<Vector3f> + Copy>(tvs: [T; 3]) -> Self {
+        let vectors = [tvs[0].into(), tvs[1].into(), tvs[2].into()];
+        let matrix = Matrix3f::from_columns(&vectors);
+        Self::from_matrix(matrix)
+    }
+
+    /// Construct `Lattice` from lattice matrix (3x3).
+    pub fn from_matrix<T: Into<Matrix3f>>(tvs: T) -> Self {
+        let matrix = tvs.into();
         let inv_matrix = get_inv_matrix(&matrix);
         Lattice {
             matrix,
@@ -130,8 +128,31 @@ impl Lattice {
 
     /// Scale Lattice by a positive constant
     pub fn scale_by(&mut self, v: f64) {
-        debug_assert!(v > 0.);
+        assert!(v.is_sign_positive(), "invalid scale factor: {v}");
         self.matrix *= v;
+        self.inv_matrix = get_inv_matrix(&self.matrix);
+    }
+
+    /// Scale Lattice in `a` direction by a positive constant
+    pub fn scale_by_a(&mut self, v: f64) {
+        self.scale_by_abc(v, 0)
+    }
+
+    /// Scale Lattice in `b` direction by a positive constant
+    pub fn scale_by_b(&mut self, v: f64) {
+        self.scale_by_abc(v, 1)
+    }
+
+    /// Scale Lattice in `c` direction by a positive constant
+    pub fn scale_by_c(&mut self, v: f64) {
+        self.scale_by_abc(v, 2)
+    }
+
+    /// Scale Lattice in length direction by a positive constant
+    fn scale_by_abc(&mut self, v: f64, i: usize) {
+        assert!(v.is_sign_positive(), "invalid scale factor: {v}");
+        let x = self.matrix.column(i);
+        self.matrix.set_column(i, &(x * v));
         self.inv_matrix = get_inv_matrix(&self.matrix);
     }
 
@@ -173,6 +194,11 @@ impl Lattice {
     /// Lattice vectors
     pub fn matrix(&self) -> Matrix3f {
         self.matrix
+    }
+
+    /// inverse of lattice matrix
+    pub fn inv_matrix(&self) -> Matrix3f {
+        self.inv_matrix
     }
 
     /// Check if lattice is orthorhombic
@@ -227,4 +253,4 @@ impl Lattice {
         }
     }
 }
-// api:1 ends here
+// f072864d ends here

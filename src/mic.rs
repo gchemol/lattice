@@ -1,17 +1,11 @@
-// imports
-
-// [[file:~/Workspace/Programming/gchemol-rs/lattice/lattice.note::*imports][imports:1]]
+// [[file:../lattice.note::*imports][imports:1]]
 use vecfx::*;
-
-#[cfg(test)]
 use approx::*;
 
 use crate::Lattice;
 // imports:1 ends here
 
-// Tuckerman algorithm
-
-// [[file:~/Workspace/Programming/gchemol-rs/lattice/lattice.note::*Tuckerman algorithm][Tuckerman algorithm:1]]
+// [[file:../lattice.note::*Tuckerman algorithm][Tuckerman algorithm:1]]
 impl Lattice {
     /// Return the approximated mic vector using Tuckerman's algorithm.
     ///
@@ -51,9 +45,7 @@ impl Lattice {
 }
 // Tuckerman algorithm:1 ends here
 
-// brute force
-
-// [[file:~/Workspace/Programming/gchemol-rs/lattice/lattice.note::*brute force][brute force:1]]
+// [[file:../lattice.note::*brute force][brute force:1]]
 impl Lattice {
     /// Return the minimal number of images for neighborhood search on each cell
     /// direction within cutoff radius
@@ -126,9 +118,7 @@ impl Lattice {
 }
 // brute force:1 ends here
 
-// test
-
-// [[file:~/Workspace/Programming/gchemol-rs/lattice/lattice.note::*test][test:1]]
+// [[file:../lattice.note::*test][test:1]]
 #[test]
 fn test_mic_distance() {
     // Setup lattice

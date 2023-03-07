@@ -1,10 +1,5 @@
-// basic.rs
-// :PROPERTIES:
-// :header-args: :tangle tests/basic.rs
-// :END:
-
-// [[file:~/Workspace/Programming/gchemol-rs/lattice/lattice.note::*basic.rs][basic.rs:1]]
-use lattice::Lattice;
+// [[file:../lattice.note::4d507fb4][4d507fb4]]
+use gchemol_lattice::Lattice;
 
 use approx::*;
 use vecfx::*;
@@ -33,6 +28,30 @@ fn test_lattice_construct() {
     let lat = Lattice::from_params(a, b, c, alpha, beta, gamma);
     assert_eq!([a, b, c], lat.lengths());
     assert_eq!([alpha, beta, gamma], lat.angles());
+
+    // scale_by_a, scale_by_b, scale_by_c
+    {
+        let mut l1 = lat.clone();
+        let [a, b, c] = l1.lengths();
+        l1.scale_by_a(2.0);
+        let [a2, b, c] = l1.lengths();
+
+        assert_eq!(a2, a * 2.0);
+        let mut l1 = lat.clone();
+        l1.scale_by_b(2.0);
+        let [_, b2, _] = l1.lengths();
+        assert_eq!(b2, b * 2.0);
+
+        let mut l1 = lat.clone();
+        l1.scale_by_c(2.0);
+        let [_, _, c2] = l1.lengths();
+        assert_eq!(c2, c * 2.0);
+    }
+
+    let vectors = lat.vectors();
+    let _ = Lattice::new(vectors);
+    let mat = lat.matrix();
+    let _ = Lattice::from_matrix(mat);
 }
 
 #[test]
@@ -91,4 +110,4 @@ fn test_wrap() {
     let wrapped = cell.wrap([1.0, 1.5, 6.0]);
     assert_relative_eq!(wrapped, Vector3f::from([1.0, 1.5, 1.0]), epsilon = 1e-4);
 }
-// basic.rs:1 ends here
+// 4d507fb4 ends here

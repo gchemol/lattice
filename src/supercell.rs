@@ -2,7 +2,7 @@
 
 // [[file:~/Workspace/Programming/gchemol-rs/lattice/lattice.note::*base][base:1]]
 use crate::Lattice;
-use guts::itertools::*;
+use gchemol_gut::itertools::*;
 use vecfx::Vector3f;
 
 impl Lattice {

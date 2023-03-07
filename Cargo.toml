@@ -1,22 +1,22 @@
-# cargo
-
-# [[file:~/Workspace/Programming/gchemol-rs/lattice/lattice.note::*cargo][cargo:1]]
+# [[file:lattice.note::ecbf527c][ecbf527c]]
 [package]
-name = "lattice"
-version = "0.0.4"
-edition = "2018"
+name = "gchemol-lattice"
+version = "0.1.1"
+edition = "2021"
 authors = ["Wenping Guo <ybyygu@gmail.com>"]
+description = "Periodic 3D crystal lattice"
+homepage = "https://github.com/gchemol/lattice"
+repository = "https://github.com/gchemol/lattice"
+license = "MIT OR Apache-2.0"
+exclude = ["bin/*", "docs/*", "ltxpng/*", "data/*"]
 
 [dependencies]
 serde = {version="1", features = ["derive"]}
-vecfx = { git = "https://github.com/gchemol/vecfx.git", features = ["nalgebra"] }
-guts = { git = "https://github.com/ybyygu/guts.git" }
-# guts = { path = "../../guts" }
+vecfx = {version="0.1.2", features = ["nalgebra"]}
+gchemol-gut = "0.4"
 
 [dev-dependencies]
-approx = { version = "0.3" }
 
 [features]
-# for adhoc hacking
-adhoc = []
-# cargo:1 ends here
+adhoc = [] # for adhoc hacking
+# ecbf527c ends here
