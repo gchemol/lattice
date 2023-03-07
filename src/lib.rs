@@ -8,7 +8,7 @@
 //        AUTHOR:  Wenping Guo <ybyygu@gmail.com>
 //       LICENCE:  GPL version 3
 //       CREATED:  <2018-04-29 14:27>
-//       UPDATED:  <2021-06-17 Thu 17:08>
+//       UPDATED:  <>
 //===============================================================================#
 // header:1 ends here
 
@@ -50,7 +50,7 @@ impl Default for Lattice {
 }
 // base:1 ends here
 
-// [[file:../lattice.note::*api][api:1]]
+// [[file:../lattice.note::f072864d][f072864d]]
 impl Lattice {
     /// Construct `Lattice` from three lattice vectors.
     pub fn new<T: Into<Vector3f> + Copy>(tvs: [T; 3]) -> Self {
@@ -128,8 +128,31 @@ impl Lattice {
 
     /// Scale Lattice by a positive constant
     pub fn scale_by(&mut self, v: f64) {
-        debug_assert!(v > 0.);
+        assert!(v.is_sign_positive(), "invalid scale factor: {v}");
         self.matrix *= v;
+        self.inv_matrix = get_inv_matrix(&self.matrix);
+    }
+
+    /// Scale Lattice in `a` direction by a positive constant
+    pub fn scale_by_a(&mut self, v: f64) {
+        self.scale_by_abc(v, 0)
+    }
+
+    /// Scale Lattice in `b` direction by a positive constant
+    pub fn scale_by_b(&mut self, v: f64) {
+        self.scale_by_abc(v, 1)
+    }
+
+    /// Scale Lattice in `c` direction by a positive constant
+    pub fn scale_by_c(&mut self, v: f64) {
+        self.scale_by_abc(v, 2)
+    }
+
+    /// Scale Lattice in length direction by a positive constant
+    fn scale_by_abc(&mut self, v: f64, i: usize) {
+        assert!(v.is_sign_positive(), "invalid scale factor: {v}");
+        let x = self.matrix.column(i);
+        self.matrix.set_column(i, &(x * v));
         self.inv_matrix = get_inv_matrix(&self.matrix);
     }
 
@@ -230,4 +253,4 @@ impl Lattice {
         }
     }
 }
-// api:1 ends here
+// f072864d ends here
