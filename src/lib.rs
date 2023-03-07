@@ -126,24 +126,24 @@ impl Lattice {
         get_cell_angles(self.matrix).into()
     }
 
-    /// Scale Lattice by a positive constant
+    /// Scale Lattice by a positive constant `v`
     pub fn scale_by(&mut self, v: f64) {
         assert!(v.is_sign_positive(), "invalid scale factor: {v}");
         self.matrix *= v;
         self.inv_matrix = get_inv_matrix(&self.matrix);
     }
 
-    /// Scale Lattice in `a` direction by a positive constant
+    /// Scale Lattice in `a` direction by a positive constant `v`
     pub fn scale_by_a(&mut self, v: f64) {
         self.scale_by_abc(v, 0)
     }
 
-    /// Scale Lattice in `b` direction by a positive constant
+    /// Scale Lattice in `b` direction by a positive constant `v`
     pub fn scale_by_b(&mut self, v: f64) {
         self.scale_by_abc(v, 1)
     }
 
-    /// Scale Lattice in `c` direction by a positive constant
+    /// Scale Lattice in `c` direction by a positive constant `v`
     pub fn scale_by_c(&mut self, v: f64) {
         self.scale_by_abc(v, 2)
     }
@@ -151,8 +151,8 @@ impl Lattice {
     /// Scale Lattice in length direction by a positive constant
     fn scale_by_abc(&mut self, v: f64, i: usize) {
         assert!(v.is_sign_positive(), "invalid scale factor: {v}");
-        let x = self.matrix.column(i);
-        self.matrix.set_column(i, &(x * v));
+        let mut x = self.matrix.column_mut(i);
+        x *= v;
         self.inv_matrix = get_inv_matrix(&self.matrix);
     }
 
